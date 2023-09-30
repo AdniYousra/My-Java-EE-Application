@@ -1,40 +1,39 @@
 node {
     def appName = 'my-javaee-app'
     def dockerImageName = 'my-javaee-app-image'
-    
+
     try {
         stage('Checkout') {
             checkout scm
         }
 
         stage('Build') {
-           
-            sh "mvn clean package"
+            bat "mvn clean package"
         }
 
         stage('Test') {
-           
-            sh "mvn test"
+            bat "mvn test"
         }
 
         stage('Deploy') {
-            
-            sh "cp target/${appName}.war $WORKSPACE"
-            
-           
-            sh "docker build -t ${dockerImageName} ."
+            // Copy the .war file to the Docker build workspace
+            bat "xcopy /Y target\\${appName}.war %WORKSPACE%"
 
-           
-            sh "docker run -d -p 8080:8080 ${dockerImageName}"
+            // Build a Docker image
+            bat "docker build -t ${dockerImageName} ."
+
+            // Deploy the Docker container (customize for your environment)
+            bat "docker run -d -p 8080:8080 ${dockerImageName}"
         }
 
     } catch (Exception e) {
         currentBuild.result = 'FAILURE'
         throw e
     } finally {
-        archiveArtifacts artifacts: "target/${appName}.war", allowEmptyArchive: true
+        // Archive the artifact
+        archiveArtifacts artifacts: "target\\${appName}.war", allowEmptyArchive: true
 
-        
+        // Print a message based on build result
         if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
             echo 'CI/CD pipeline completed successfully!'
         } else {
@@ -42,3 +41,4 @@ node {
         }
     }
 }
+
