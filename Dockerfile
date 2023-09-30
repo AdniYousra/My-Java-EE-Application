@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM mcr.microsoft.com/java/jdk:8-zulu-windowsservercore
 
 WORKDIR /app
 
