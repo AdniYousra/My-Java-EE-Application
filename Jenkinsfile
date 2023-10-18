@@ -26,6 +26,32 @@ node {
             bat "docker run -d -p 8080:8080 ${dockerImageName}"
         }
 
+        stage('Kubernetes Deployment') {
+            steps {
+                script {
+                    def kubeconfigPath = "${env.HOME}/.kube/config" // Path to your kubeconfig file
+                    def kubeconfigContent = bat(script: "kubectl config view --raw", returnStdout: true).trim()
+
+                    writeFile file: kubeconfigPath, text: kubeconfigContent
+
+                    bat "kubectl apply -f Deployment.yaml"
+                }
+            }
+        }
+
+        stage('Kubernetes Service') {
+            steps {
+                script {
+                    def kubeconfigPath = "${env.HOME}/.kube/config" // Path to your kubeconfig file
+                    def kubeconfigContent = bat(script: "kubectl config view --raw", returnStdout: true).trim()
+
+                    writeFile file: kubeconfigPath, text: kubeconfigContent
+
+                    bat "kubectl apply -f Service.yaml"
+                }
+            }
+        }
+
     } catch (Exception e) {
         currentBuild.result = 'FAILURE'
         throw e
@@ -41,4 +67,3 @@ node {
         }
     }
 }
-
